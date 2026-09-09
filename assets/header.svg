@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="280" viewBox="0 0 1200 280" role="img" aria-labelledby="title desc">
+  <title id="title">Mohammed Miran — AI-first builder</title>
+  <desc id="desc">Profile header for Mohammed Miran and mmoptibuilds.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0b0d10"/>
+      <stop offset="0.55" stop-color="#151a21"/>
+      <stop offset="1" stop-color="#0d1117"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="72%" cy="34%" r="60%">
+      <stop offset="0" stop-color="#4f8cff" stop-opacity="0.20"/>
+      <stop offset="1" stop-color="#4f8cff" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1200" height="280" rx="26" fill="url(#bg)"/>
+  <rect width="1200" height="280" rx="26" fill="url(#glow)"/>
+  <path d="M860 0H1200V280H750C860 225 900 155 860 0Z" fill="#ffffff" opacity="0.025"/>
+  <g fill="none" stroke="#ffffff" opacity="0.07">
+    <path d="M48 216H1152"/>
+    <path d="M48 66H1152"/>
+  </g>
+  <text x="64" y="66" fill="#9ba7b4" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="18" letter-spacing="3">MMOPTIBUILDS</text>
+  <text x="64" y="132" fill="#ffffff" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="48" font-weight="700" letter-spacing="-1">Mohammed Miran</text>
+  <text x="64" y="176" fill="#c2cad3" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="22">AI-first builder · web products · automation · infrastructure</text>
+  <text x="64" y="238" fill="#7f8a96" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="17">Bengaluru, India  ·  mmoptibuilds.com</text>
+  <circle cx="1114" cy="66" r="8" fill="#4f8cff"/>
+  <circle cx="1086" cy="66" r="8" fill="#ffffff" opacity="0.22"/>
+  <circle cx="1058" cy="66" r="8" fill="#ffffff" opacity="0.10"/>
+</svg>
