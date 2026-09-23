@@ -6,6 +6,10 @@
   <a href="https://mmoptibuilds.com"><strong>mmoptibuilds.com</strong></a>
   &nbsp;·&nbsp;
   <a href="https://x.com/mmoptibuilds">X / @mmoptibuilds</a>
+  &nbsp;·&nbsp;
+  <a href="https://www.instagram.com/mmoptibuilds">instagram / @mmoptibuilds</a>
+  &nbsp;·&nbsp;
+  <a href="https://www.threads.com/@mmoptibuilds">threads / @mmoptibuilds</a>
 </p>
 
 ## About
