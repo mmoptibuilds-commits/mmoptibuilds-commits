@@ -2,14 +2,23 @@
   <img src="./assets/header.svg" alt="Mohammed Miran — AI-first builder" width="100%" />
 </p>
 
-<p align="center">
-  <a href="https://mmoptibuilds.com"><strong>mmoptibuilds.com</strong></a>
-  &nbsp;·&nbsp;
-  <a href="https://x.com/mmoptibuilds">X / @mmoptibuilds</a>
-  &nbsp;·&nbsp;
-  <a href="https://www.instagram.com/mmoptibuilds">instagram / @mmoptibuilds</a>
-  &nbsp;·&nbsp;
-  <a href="https://www.threads.com/@mmoptibuilds">threads / @mmoptibuilds</a>
+<!-- Polished Social Dock -->
+<p align="center" style="display: flex; justify-content: center; align-items: center; gap: 20px; background: rgba(255, 255, 255, 0.05); border-radius: 50px; padding: 10px 25px; width: fit-content; margin: 0 auto;">
+  <a href="https://mmoptibuilds.com" style="text-decoration:none;">
+    <img src="https://cdn.simpleicons.org/googlechrome/888888" width="22" height="22" alt="Website" />
+  </a>
+  
+  <a href="https://x.com/mmoptibuilds" style="text-decoration:none;">
+    <img src="https://cdn.simpleicons.org/x/888888" width="22" height="22" alt="X" />
+  </a>
+  
+  <a href="https://www.instagram.com/mmoptibuilds" style="text-decoration:none;">
+    <img src="https://cdn.simpleicons.org/instagram/888888" width="22" height="22" alt="Instagram" />
+  </a>
+  
+  <a href="https://www.threads.net/@mmoptibuilds" style="text-decoration:none;">
+    <img src="https://cdn.simpleicons.org/threads/888888" width="22" height="22" alt="Threads" />
+  </a>
 </p>
 
 ## About
