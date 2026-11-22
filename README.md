@@ -1,8 +1,4 @@
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="./assets/header-dark.svg">
-  <source media="(prefers-color-scheme: light)" srcset="./assets/header-light.svg">
-  <img alt="Mohammed Miran" src="./assets/header-light.svg" width="680">
-</picture>
+<img alt="Mohammed Miran" src="./assets/header.svg" width="100%">
 
 I build local-first apps and web products in Bengaluru. My work lives at [mmoptibuilds.com](https://mmoptibuilds.com). I'm @mmoptibuilds on [X](https://x.com/mmoptibuilds), [Instagram](https://www.instagram.com/mmoptibuilds) and [Threads](https://www.threads.net/@mmoptibuilds). If you need a website or hardware for a small business, email me at [hello@mmoptibuilds.com](mailto:hello@mmoptibuilds.com).
 
