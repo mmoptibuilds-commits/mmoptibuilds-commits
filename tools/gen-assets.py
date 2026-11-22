@@ -1,249 +1,160 @@
 #!/usr/bin/env python3
-"""Generates every SVG used by the GitHub profile README (dark + light)."""
+"""Builds the profile header: my name, rolling through the languages I speak.
+
+    pip install fonttools uharfbuzz
+    python3 tools/gen-assets.py
+
+Writes assets/header-light.svg and assets/header-dark.svg at the repo root.
+Fonts are downloaded once from google/fonts into tools/.font-cache/ (ignored
+by git). Each name is shaped here with HarfBuzz and stored as outlines, so
+conjuncts and joins come out right on every viewer and no font is shipped.
+Typefaces (all SIL Open Font License 1.1): Schibsted Grotesk, Noto Sans
+Devanagari, Noto Nastaliq Urdu, Noto Sans Kannada and Noto Sans JP.
+"""
+import io
+import urllib.request
 from pathlib import Path
-from xml.sax.saxutils import escape as esc
+from xml.sax.saxutils import escape
 
-OUT = Path(__file__).parent / "out" / "assets"
-SANS = "-apple-system, BlinkMacSystemFont, 'Segoe UI Variable Display', 'Segoe UI', Inter, 'Helvetica Neue', Arial, sans-serif"
-MONO = "ui-monospace, 'SF Mono', 'JetBrains Mono', 'Cascadia Code', Menlo, Consolas, 'DejaVu Sans Mono', monospace"
-MONO_CW = 0.61  # monospace advance width per em (conservative)
+import uharfbuzz as hb
+from fontTools.pens.boundsPen import BoundsPen
+from fontTools.pens.svgPathPen import SVGPathPen
+from fontTools.pens.transformPen import TransformPen
+from fontTools.ttLib import TTFont
+from fontTools.varLib import instancer
 
-THEMES = {
-    "dark": dict(
-        page="#0d1117", panel="#0f141b", card="#11171f", border="#232a33", grid="#1c232c",
-        text="#e6edf3", muted="#9aa5b1", faint="#6b7581", sub="#8b96a3",
-        accent="#f2a65a", accent2="#7ee0c3", blue="#82b8ff", grey="#9aa5b1",
-        chip_bg="#161d26", chip_text="#c9d3dd", chip_border="#2a333e",
-    ),
-    "light": dict(
-        page="#ffffff", panel="#fbfaf8", card="#fbfaf8", border="#e3ddd4", grid="#ece6dc",
-        text="#1f2328", muted="#545e69", faint="#7a838d", sub="#5e6873",
-        accent="#a8480f", accent2="#0b6b61", blue="#1f5fbf", grey="#5f6a75",
-        chip_bg="#f3eee6", chip_text="#3a434c", chip_border="#e0d8cc",
-    ),
-}
+ROOT = Path(__file__).resolve().parent.parent
+ASSETS = ROOT / "assets"
+CACHE = Path(__file__).resolve().parent / ".font-cache"
+GF = "https://raw.githubusercontent.com/google/fonts/main/ofl/"
 
-REDUCED = "@media (prefers-reduced-motion: reduce){*{animation:none!important}}"
+# (language, name, font path in google/fonts, axes, size px, tracking px)
+NAMES = [
+    ("English", "Mohammed Miran", "schibstedgrotesk/SchibstedGrotesk[wght].ttf", {"wght": 760}, 118, -4.8),
+    ("Hindi", "मोहम्मद मीरान", "notosansdevanagari/NotoSansDevanagari[wdth,wght].ttf", {"wght": 700, "wdth": 100}, 104, 0),
+    ("Japanese", "モハメド・ミラン", "notosansjp/NotoSansJP[wght].ttf", {"wght": 800}, 104, -2.0),
+    ("Urdu", "محمد میران", "notonastaliqurdu/NotoNastaliqUrdu[wght].ttf", {"wght": 700}, 78, 0),
+    ("Kannada", "ಮೊಹಮ್ಮದ್ ಮೀರಾನ್", "notosanskannada/NotoSansKannada[wdth,wght].ttf", {"wght": 700, "wdth": 100}, 94, 0),
+    ("Japanese", "モハメド・ミラン", "notosansjp/NotoSansJP[wght].ttf", {"wght": 800}, 104, -2.0),
+]
+
+THEMES = {"light": "#1f2328", "dark": "#f0f6fc"}  # GitHub's own text colours
+
+HOLD, MOVE = 2.2, 0.6  # seconds each name rests, seconds to roll to the next
+BAND = 164             # height of the window the names roll through
+BASELINE = 120         # shared baseline inside the band
+GAP_BELOW = 26         # space between the header and the text under it
 
 
-def svg(w, h, body, title, style=""):
-    return (
-        f'<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" viewBox="0 0 {w} {h}" '
-        f'role="img" aria-label="{esc(title)}" fill="none">\n<title>{esc(title)}</title>\n'
-        f"<style>{style}{REDUCED}</style>\n{body}\n</svg>\n"
+def load(path, axes):
+    local = CACHE / path.replace("/", "__")
+    if not local.exists():
+        CACHE.mkdir(exist_ok=True)
+        url = GF + path.replace("[", "%5B").replace("]", "%5D")
+        urllib.request.urlretrieve(url, local)
+    return instancer.instantiateVariableFont(TTFont(local), axes)
+
+
+def to_bytes(font):
+    buf = io.BytesIO()
+    font.save(buf)
+    return buf.getvalue()
+
+
+def outline(font, text, size, track):
+    """Shape text with HarfBuzz and return (svg path data, ink box)."""
+    data = to_bytes(font)
+    face = hb.Face(data)
+    hbfont = hb.Font(face)
+    buf = hb.Buffer()
+    buf.add_str(text)
+    buf.guess_segment_properties()
+    hb.shape(hbfont, buf, {})
+    glyphs = TTFont(io.BytesIO(data)).getGlyphSet()
+    order = TTFont(io.BytesIO(data)).getGlyphOrder()
+    k = size / face.upem
+    svgpen = SVGPathPen(glyphs, ntos=lambda v: f"{v:.1f}".rstrip("0").rstrip("."))
+    bounds = BoundsPen(glyphs)
+    x = 0.0
+    infos, positions = buf.glyph_infos, buf.glyph_positions
+    for n, (info, pos) in enumerate(zip(infos, positions)):
+        # font units, y up  ->  px, y down, baseline at 0
+        m = (k, 0, 0, -k, (x + pos.x_offset) * k, -pos.y_offset * k)
+        name = order[info.codepoint]
+        glyphs[name].draw(TransformPen(svgpen, m))
+        glyphs[name].draw(TransformPen(bounds, m))
+        x += pos.x_advance + (track / k if n < len(infos) - 1 else 0)
+    left, top, right, bottom = bounds.bounds  # px, y down
+    return svgpen.getCommands(), left, right, -top, -bottom
+
+
+def build():
+    shaped = []
+    for label, text, path, axes, size, track in NAMES:
+        d, left, right, top, bottom = outline(load(path, axes), text, size, track)
+        shaped.append(dict(label=label, text=text, d=d, left=left, right=right,
+                           top=top, bottom=bottom))
+    return shaped
+
+
+def svg(shaped, color):
+    pad = 6
+    width = round(max(s["right"] - s["left"] for s in shaped) + 2 * pad)
+    height = BAND + GAP_BELOW
+    n = len(shaped)
+    slot = HOLD + MOVE
+    cycle = slot * n
+    p = lambda sec: f"{sec / cycle * 100:.3f}%"
+    # one keyframe for every name; delays put each one in its own slot
+    keys = (
+        f"@keyframes roll{{"
+        f"0%{{transform:translateY(0);opacity:1;animation-timing-function:cubic-bezier(.6,0,.4,1)}}"
+        f"{p(HOLD)}{{transform:translateY(0);opacity:1;animation-timing-function:cubic-bezier(.6,0,.4,1)}}"
+        f"{p(slot)}{{transform:translateY(-{BAND}px);opacity:0}}"
+        f"{p(slot + 0.001)}{{transform:translateY({BAND}px);opacity:0}}"
+        f"{p(cycle - MOVE)}{{transform:translateY({BAND}px);opacity:0;animation-timing-function:cubic-bezier(.2,.7,.2,1)}}"
+        f"100%{{transform:translateY(0);opacity:1}}}}"
     )
-
-
-def chip_w(label, size=11, pad=10):
-    return round(len(label) * size * MONO_CW + pad * 2)
-
-
-def chips(labels, x, y, t, size=11, h=22, gap=6, max_x=None):
-    out, cx, cy = [], x, y
-    for lab in labels:
-        w = chip_w(lab, size)
-        if max_x and cx + w > max_x:
-            cx, cy = x, cy + h + gap
-        out.append(
-            f'<rect x="{cx}" y="{cy}" width="{w}" height="{h}" rx="{h/2}" fill="{t["chip_bg"]}" stroke="{t["chip_border"]}"/>'
-            f'<text x="{cx + w/2}" y="{cy + h/2 + size*0.36:.1f}" text-anchor="middle" font-family="{MONO}" '
-            f'font-size="{size}" fill="{t["chip_text"]}">{esc(lab)}</text>'
+    rules, texts = [f"path{{fill:{color}}}"], []
+    for i, s in enumerate(shaped):
+        delay = i * slot - cycle if i else 0
+        rules.append(
+            f".n{i}{{animation:roll {cycle:.1f}s {delay:.1f}s infinite both;"
+            + ("" if i == 0 else f"transform:translateY({BAND}px);opacity:0;") + "}"
         )
-        cx += w + gap
-    return "".join(out), cy + h
-
-
-# ---------------------------------------------------------------- header
-def header(t, mode):
-    W, H = 1200, 340
-    cx, cy = 980, 170
-    rings = []
-    for i, r in enumerate([40, 72, 104, 136, 168, 200]):
-        op = 0.85 - i * 0.12
-        dash = "" if i % 2 == 0 else ' stroke-dasharray="2 7"'
-        rings.append(f'<circle r="{r}" stroke="{t["faint"]}" stroke-opacity="{op:.2f}"{dash}/>')
-    style = (
-        f".spin{{animation:spin 48s linear infinite}}.spin2{{animation:spin 30s linear infinite reverse}}"
-        f"@keyframes spin{{to{{transform:rotate(360deg)}}}}"
-        f".blink{{animation:blink 1.1s steps(1) infinite}}@keyframes blink{{50%{{opacity:0}}}}"
-        f".pulse{{animation:pulse 2.6s ease-in-out infinite}}@keyframes pulse{{50%{{opacity:.35}}}}"
-        f".drift{{animation:drift 14s ease-in-out infinite alternate}}@keyframes drift{{to{{transform:translateX(-60px)}}}}"
-    )
-    body = f"""
-<defs>
-  <pattern id="dots" width="22" height="22" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1.1" fill="{t['grid']}"/></pattern>
-  <linearGradient id="fade" x1="0" x2="1"><stop offset="0.35" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#fff" stop-opacity="1"/></linearGradient>
-  <mask id="m"><rect width="{W}" height="{H}" fill="url(#fade)"/></mask>
-  <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="{t['accent']}" stop-opacity="{0.22 if mode=='dark' else 0.14}"/><stop offset="1" stop-color="{t['accent']}" stop-opacity="0"/></radialGradient>
-  <clipPath id="clip"><rect width="{W}" height="{H}" rx="20"/></clipPath>
-</defs>
-<g clip-path="url(#clip)">
-  <rect width="{W}" height="{H}" fill="{t['panel']}"/>
-  <rect width="{W}" height="{H}" fill="url(#dots)" mask="url(#m)"/>
-  <g class="drift"><circle cx="{cx}" cy="{cy}" r="260" fill="url(#glow)"/></g>
-  <g transform="translate({cx} {cy})">
-    {''.join(rings)}
-    <g class="spin"><circle cx="104" cy="0" r="5" fill="{t['accent']}"/><circle cx="-168" cy="0" r="3.5" fill="{t['accent2']}"/></g>
-    <g class="spin2"><circle cx="0" cy="-136" r="4" fill="{t['text']}" fill-opacity="0.8"/><circle cx="0" cy="72" r="3" fill="{t['accent']}" fill-opacity="0.7"/></g>
-    <circle r="9" fill="{t['accent']}"/><circle r="18" stroke="{t['accent']}" stroke-opacity="0.45"/>
-  </g>
+        # HarfBuzz lays out RTL runs in visual order too, so one rule
+        # left-aligns every script.
+        x = pad - s["left"]
+        texts.append(f'<g class="n{i}"><path transform="translate({x:.1f} {BASELINE})" d="{s["d"]}"/></g>')
+    still = "@media (prefers-reduced-motion: reduce){[class^=n]{animation:none}}"
+    langs = ", ".join(s["label"] for s in shaped)
+    return f"""<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" viewBox="0 0 {width} {height}" role="img" aria-label="Mohammed Miran">
+<title>Mohammed Miran</title>
+<desc>My name in {escape(langs)}.</desc>
+<defs><clipPath id="band"><rect width="{width}" height="{BAND}"/></clipPath></defs>
+<style>
+{keys}
+{''.join(rules)}
+{still}
+</style>
+<g clip-path="url(#band)">
+{chr(10).join(texts)}
 </g>
-<rect x="0.5" y="0.5" width="{W-1}" height="{H-1}" rx="19.5" stroke="{t['border']}"/>
-<circle class="pulse" cx="72" cy="78" r="5" fill="{t['accent2']}"/>
-<text x="88" y="83" font-family="{MONO}" font-size="15" letter-spacing="0.5" fill="{t['muted']}">mmoptibuilds &#183; bengaluru, india</text>
-<text x="64" y="172" font-family="{SANS}" font-size="70" font-weight="700" letter-spacing="-2" fill="{t['text']}">Mohammed Miran</text>
-<text x="66" y="222" font-family="{SANS}" font-size="22" fill="{t['muted']}"><tspan fill="{t['accent']}" font-weight="600">AI-first builder.</tspan> Local-first apps, web products, infrastructure.</text>
-<text x="66" y="280" font-family="{MONO}" font-size="14" fill="{t['sub']}">$ ship --verified --accessible --no-fake-claims<tspan class="blink" fill="{t['accent']}"> &#9608;</tspan></text>
+</svg>
 """
-    return svg(W, H, body, "Mohammed Miran. AI-first builder in Bengaluru, India.", style)
-
-
-# ---------------------------------------------------------------- cards
-STATUS_COLOR = {"shipped": "accent2", "live": "blue", "paused": "grey"}
-
-CARDS = [
-    dict(slug="notes", title="Notes", sub="Flutter · Android + Linux", status=("v1.1.0 · shipped", "shipped"),
-         body=["Offline-first notes in an encrypted local database.",
-               "Pair devices by QR and sync peer-to-peer over LAN,",
-               "no account, no relay. Ed25519-signed releases."],
-         chips=["Flutter", "Dart", "SQLite", "LAN sync", "Ed25519"]),
-    dict(slug="markdown-reader", title="Markdown Reader", sub="Browser extension · MV3", status=("v1.0.0 · shipped", "shipped"),
-         body=["Local-first Markdown reader for Chrome, Edge,",
-               "Vivaldi and Firefox. KaTeX, Mermaid, Graphviz,",
-               "folder workspaces. No backend, no telemetry."],
-         chips=["WXT", "React", "TypeScript", "Playwright", "axe"]),
-    dict(slug="coldharbour", title="Coldharbour", sub="Full-stack demo product", status=("live demo", "live"),
-         body=["Evidence-first cold-chain monitoring for clinical",
-               "shipments. Telemetry exploration, motion design,",
-               "accessibility and SEO. Fictional data, real build."],
-         chips=["Next.js", "PostgreSQL", "Drizzle", "GSAP"]),
-    dict(slug="mmoptibuilds", title="mmoptibuilds", sub="Business platform · Systems + Studio", status=("deployed", "live"),
-         body=["One platform, two divisions with their own design",
-               "systems. Owner console, enquiry storage, SEO and",
-               "a nine-gate verification pipeline."],
-         chips=["Next.js", "TypeScript", "Vercel", "Playwright"]),
-    dict(slug="upload-portal", title="Client Upload Portal", sub="upload.mmoptibuilds.com", status=("shipped", "shipped"),
-         body=["Protected client-to-admin file delivery with",
-               "authenticated user and admin flows, a resumable",
-               "upload architecture and upload history."],
-         chips=["Next.js", "TypeScript", "Auth", "Drive"]),
-    dict(slug="hearth-os", title="Hearth OS", sub="Installable browser desktop", status=("paused", "paused"),
-         body=["Local-first personal desktop in the browser:",
-               "floating windows, widgets, iOS-style mobile sheets,",
-               "Dexie persistence and offline PWA support."],
-         chips=["React", "Vite", "Dexie", "Workbox", "Vitest"]),
-]
-
-
-def card(c, t):
-    W, H = 480, 212
-    label, kind = c["status"]
-    col = t[STATUS_COLOR[kind]]
-    pw = chip_w(label.upper(), 10, 12) + 14
-    chip_svg, _ = chips(c["chips"], 24, H - 44, t, max_x=W - 56)
-    lines = "".join(
-        f'<text x="24" y="{104 + i*21}" font-family="{SANS}" font-size="14.5" fill="{t["muted"]}">{esc(l)}</text>'
-        for i, l in enumerate(c["body"])
-    )
-    body = f"""
-<defs><linearGradient id="top{t['_m']}" x1="0" x2="1"><stop offset="0" stop-color="{col}"/><stop offset="0.6" stop-color="{col}" stop-opacity="0"/></linearGradient>
-<clipPath id="c{t['_m']}"><rect width="{W}" height="{H}" rx="14"/></clipPath></defs>
-<g clip-path="url(#c{t['_m']})"><rect width="{W}" height="{H}" fill="{t['card']}"/><rect width="{W}" height="2" fill="url(#top{t['_m']})"/></g>
-<rect x="0.5" y="0.5" width="{W-1}" height="{H-1}" rx="13.5" stroke="{t['border']}"/>
-<text x="24" y="46" font-family="{SANS}" font-size="23" font-weight="700" letter-spacing="-0.4" fill="{t['text']}">{esc(c['title'])}</text>
-<text x="24" y="69" font-family="{MONO}" font-size="12" fill="{t['sub']}">{esc(c['sub'])}</text>
-<rect x="{W-24-pw}" y="25" width="{pw}" height="24" rx="12" fill="{col}" fill-opacity="0.12" stroke="{col}" stroke-opacity="0.45"/>
-<circle cx="{W-24-pw+13}" cy="37" r="3.5" fill="{col}"/>
-<text x="{W-24-pw+22}" y="40.6" font-family="{MONO}" font-size="10" font-weight="600" letter-spacing="0.6" fill="{col}">{esc(label.upper())}</text>
-{lines}
-{chip_svg}
-<path d="M{W-38} {H-22} L{W-26} {H-34} M{W-35} {H-34} H{W-26} V{H-25}" stroke="{t['faint']}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-"""
-    alt = f"{c['title']}: {' '.join(c['body'])} Status: {label}."
-    return svg(W, H, body, alt)
-
-
-# ---------------------------------------------------------------- stack
-STACK = [
-    ("PRODUCT & WEB", ["Next.js", "React", "TypeScript", "Tailwind", "Flutter", "Dart", "PostgreSQL", "Drizzle", "Supabase", "Dexie", "PWA", "WXT"]),
-    ("QUALITY", ["Playwright", "Vitest", "axe", "responsive QA", "perf budgets", "Vercel", "Cloudflare"]),
-    ("INFRA", ["Linux", "Docker", "Portainer", "SSH", "DNS", "Cloudflare Tunnel", "Tailscale", "self-hosting"]),
-    ("AI WORKFLOW", ["Claude Code", "Codex", "Gemini", "OpenCode", "MCP", "Ollama", "multi-model review"]),
-]
-
-
-def stack(t):
-    W = 980
-    y, rows = 32, []
-    for label, items in STACK:
-        rows.append(f'<text x="32" y="{y+15}" font-family="{MONO}" font-size="11.5" font-weight="600" letter-spacing="1.2" fill="{t["accent"]}">{esc(label)}</text>')
-        s, bottom = chips(items, 200, y, t, size=12, h=24, gap=8, max_x=W - 32)
-        rows.append(s)
-        y = bottom + 20
-    H = y + 8
-    body = (f'<rect x="0.5" y="0.5" width="{W-1}" height="{H-1}" rx="14" fill="{t["card"]}" stroke="{t["border"]}"/>' + "".join(rows))
-    alt = "Tech stack. " + " ".join(f"{l.title()}: {', '.join(i)}." for l, i in STACK)
-    return svg(W, H, body, alt)
-
-
-# ---------------------------------------------------------------- socials
-def icon(kind, t, x, y):
-    s = t["text"]
-    if kind == "web":
-        return (f'<g transform="translate({x} {y})" stroke="{s}" stroke-width="1.5"><circle cx="8" cy="8" r="7"/>'
-                f'<ellipse cx="8" cy="8" rx="3" ry="7"/><path d="M1 8h14"/></g>')
-    if kind == "x":
-        return (f'<g transform="translate({x} {y}) scale(0.667)"><path fill="{s}" d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z"/></g>')
-    if kind == "ig":
-        return (f'<g transform="translate({x} {y})" stroke="{s}" stroke-width="1.5"><rect x="1" y="1" width="14" height="14" rx="4"/>'
-                f'<circle cx="8" cy="8" r="3.2"/><circle cx="12" cy="4" r="0.6" fill="{s}"/></g>')
-    if kind == "threads":
-        return (f'<text x="{x+8}" y="{y+13}" text-anchor="middle" font-family="{SANS}" font-size="17" font-weight="600" fill="{s}">@</text>')
-    if kind == "mail":
-        return (f'<g transform="translate({x} {y})" stroke="{s}" stroke-width="1.5" stroke-linejoin="round"><rect x="1" y="3" width="14" height="10" rx="2"/>'
-                f'<path d="M1.5 4l6.5 5 6.5-5"/></g>')
-
-
-SOCIALS = [("web", "mmoptibuilds.com"), ("x", "X"), ("ig", "Instagram"), ("threads", "Threads"), ("mail", "Email")]
-
-
-def social(kind, label, t):
-    tw = round(len(label) * 13 * 0.6)
-    W, H = 18 + 16 + 10 + tw + 18, 40
-    body = (f'<rect x="0.5" y="0.5" width="{W-1}" height="{H-1}" rx="20" fill="{t["card"]}" stroke="{t["border"]}"/>'
-            + icon(kind, t, 18, 12)
-            + f'<text x="44" y="24.5" font-family="{SANS}" font-size="13" font-weight="500" fill="{t["text"]}">{esc(label)}</text>')
-    return svg(W, H, body, label)
-
-
-ADAPT = ".d{display:none}@media (prefers-color-scheme: dark){.l{display:none}.d{display:inline}}"
-
-
-def adaptive(fn, *args):
-    """One SVG holding both themes; the viewer's color scheme picks one."""
-    import re
-    parts = {}
-    for mode in ("light", "dark"):
-        t = dict(THEMES[mode], _m=mode[0])
-        parts[mode] = fn(*args, t)
-    head = re.match(r"(<svg[^>]*>\n<title>.*?</title>\n)<style>(.*?)</style>\n", parts["light"], re.S)
-    inner = {m: re.sub(r"^<svg[^>]*>\n<title>.*?</title>\n<style>.*?</style>\n|\n</svg>\n$", "", p, flags=re.S) for m, p in parts.items()}
-    return (head.group(1) + f"<style>{head.group(2)}{ADAPT}</style>\n"
-            + f'<g class="l">{inner["light"]}</g>\n<g class="d">{inner["dark"]}</g>\n</svg>\n')
 
 
 def main():
-    import shutil
-    shutil.rmtree(OUT, ignore_errors=True)
-    (OUT / "cards").mkdir(parents=True)
-    (OUT / "socials").mkdir(parents=True)
-    for c in CARDS:
-        (OUT / "cards" / f"{c['slug']}.svg").write_text(adaptive(card, c))
-    for kind, label in SOCIALS:
-        (OUT / "socials" / f"{kind}.svg").write_text(adaptive(social, kind, label))
-    for mode, t in THEMES.items():
-        (OUT / f"header-{mode}.svg").write_text(header(t, mode))
-        (OUT / f"stack-{mode}.svg").write_text(stack(t))
+    shaped = build()
+    for s in shaped:  # every name must sit inside the band, or it gets clipped
+        assert BASELINE - s["top"] >= 2 and BASELINE - s["bottom"] <= BAND - 2, s["label"]
+    for s in shaped:
+        print(f"{s['label']:9} ink x {s['left']:7.1f}..{s['right']:7.1f}  y {s['bottom']:6.1f}..{s['top']:6.1f}")
+    for mode, color in THEMES.items():
+        ASSETS.mkdir(parents=True, exist_ok=True)
+        out = ASSETS / f"header-{mode}.svg"
+        out.write_text(svg(shaped, color))
+        print(f"wrote {out.relative_to(ROOT)} ({out.stat().st_size // 1024} KB)")
 
 
 if __name__ == "__main__":

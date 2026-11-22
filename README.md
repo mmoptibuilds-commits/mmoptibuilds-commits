@@ -1,63 +1,55 @@
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="./assets/header-dark.svg">
   <source media="(prefers-color-scheme: light)" srcset="./assets/header-light.svg">
-  <img alt="Mohammed Miran. AI-first builder in Bengaluru, India." src="./assets/header-dark.svg" width="100%">
+  <img alt="Mohammed Miran" src="./assets/header-light.svg" width="680">
 </picture>
 
-<p align="center">
-  <a href="https://mmoptibuilds.com"><img alt="Website: mmoptibuilds.com" src="./assets/socials/web.svg" height="36"></a>
-  <a href="https://x.com/mmoptibuilds"><img alt="X: @mmoptibuilds" src="./assets/socials/x.svg" height="36"></a>
-  <a href="https://www.instagram.com/mmoptibuilds"><img alt="Instagram: @mmoptibuilds" src="./assets/socials/ig.svg" height="36"></a>
-  <a href="https://www.threads.net/@mmoptibuilds"><img alt="Threads: @mmoptibuilds" src="./assets/socials/threads.svg" height="36"></a>
-  <a href="mailto:hello@mmoptibuilds.com"><img alt="Email: hello@mmoptibuilds.com" src="./assets/socials/mail.svg" height="36"></a>
-</p>
+I build local-first apps and web products in Bengaluru. My work lives at [mmoptibuilds.com](https://mmoptibuilds.com). I'm @mmoptibuilds on [X](https://x.com/mmoptibuilds), [Instagram](https://www.instagram.com/mmoptibuilds) and [Threads](https://www.threads.net/@mmoptibuilds), and you can email me at [hello@mmoptibuilds.com](mailto:hello@mmoptibuilds.com).
 
-<br>
+There is an [interactive version of this profile](https://mmoptibuilds-commits.github.io/mmoptibuilds-commits/) with the same name cycle and a circle you can spin.
 
-I'm **Mohammed Miran**, a BCA student in Bengaluru and the builder behind **mmoptibuilds**.
+## About
 
-I work AI-first. I own the product, UX, architecture, specs and the verification loop, and I use coding agents to turn that direction into software that actually ships. Most of what I build is **local-first**: your data stays on your device, works offline, and doesn't need an account to be useful.
+The name at the top cycles through English, Hindi, Urdu, Kannada and Japanese. Hindi and Urdu are my first languages, and Japanese is the one I'm learning.
 
-## Featured work
+I'm a BCA student and I run mmoptibuilds. It has two sides: Studio builds websites and web apps, and Systems handles custom PCs, workstations and hardware for small businesses.
 
-<p align="center">
-  <a href="https://github.com/mmoptibuilds-commits/notes-app"><img alt="Notes: offline-first encrypted notes for Android and Linux with peer-to-peer LAN sync. Shipped, v1.1.0." src="./assets/cards/notes.svg" width="49%"></a>
-  <a href="https://github.com/mmoptibuilds-commits/markdown-reader-extension"><img alt="Markdown Reader: local-first Markdown reader browser extension for Chrome, Edge, Vivaldi and Firefox. Shipped, v1.0.0." src="./assets/cards/markdown-reader.svg" width="49%"></a>
-</p>
-<p align="center">
-  <a href="https://github.com/mmoptibuilds-commits/coldharbour"><img alt="Coldharbour: full-stack demo product for clinical cold-chain monitoring. Live demo." src="./assets/cards/coldharbour.svg" width="49%"></a>
-  <a href="https://github.com/mmoptibuilds-commits/mmoptibuilds-portfolio-yin-yang"><img alt="mmoptibuilds: business platform with Systems and Studio divisions, owner console and nine-gate verification. Deployed." src="./assets/cards/mmoptibuilds.svg" width="49%"></a>
-</p>
-<p align="center">
-  <a href="https://github.com/mmoptibuilds-commits/mmoptibuilds-upload-portal"><img alt="Client Upload Portal: protected client-to-admin file delivery with resumable uploads. Shipped." src="./assets/cards/upload-portal.svg" width="49%"></a>
-  <a href="https://github.com/mmoptibuilds-commits/web-dash"><img alt="Hearth OS: local-first installable personal desktop for the browser. Paused." src="./assets/cards/hearth-os.svg" width="49%"></a>
-</p>
+On software projects I write the spec and decide how things should look and behave. Coding agents do most of the typing. Nothing counts as done until I've used it in a real browser or on my own phone.
 
-<sub>Also: <a href="https://github.com/mmoptibuilds-commits/portfolio-setup">Portfolio Setup</a>, my structured workflow for AI-assisted planning, implementation, QA and handoff.</sub>
+## Work
 
-## Stack
+| Project | What it is |
+| --- | --- |
+| [Notes](https://github.com/mmoptibuilds-commits/notes-app)<br><sub>Released, v1.1.0</sub> | Offline-first notes for Android and Linux. Notes are encrypted on the device and sync directly between your own devices over Wi-Fi, with no account or server. |
+| [Markdown Reader](https://github.com/mmoptibuilds-commits/markdown-reader-extension)<br><sub>Finished, v1.0.0</sub> | A browser extension that opens Markdown from the web or your disk and renders it properly, maths and Mermaid diagrams included. Runs in Chrome, Edge, Vivaldi and Firefox. |
+| [Coldharbour](https://github.com/mmoptibuilds-commits/coldharbour)<br><sub>Demo, [live here](https://coldharbour.mmoptibuilds.com)</sub> | A product site for a made-up company that monitors temperatures on clinical shipments. The company and its data are fictional. The site runs on Next.js and PostgreSQL. |
+| [mmoptibuilds.com](https://github.com/mmoptibuilds-commits/mmoptibuilds-portfolio-yin-yang)<br><sub>Live, [visit](https://mmoptibuilds.com)</sub> | The business site for Studio and Systems, with an owner console for handling enquiries. |
+| [Client Upload Portal](https://github.com/mmoptibuilds-commits/mmoptibuilds-upload-portal)<br><sub>Finished</sub> | How clients send me files. I create the accounts, uploads pick up where they left off if the connection drops, and files end up in Google Drive. |
+| [Hearth OS](https://github.com/mmoptibuilds-commits/web-dash)<br><sub>Paused</sub> | A desktop that runs in the browser, with windows, widgets and offline storage. You can install it like an app. |
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="./assets/stack-dark.svg">
-  <source media="(prefers-color-scheme: light)" srcset="./assets/stack-light.svg">
-  <img alt="Tech stack. Product and web: Next.js, React, TypeScript, Tailwind, Flutter, Dart, PostgreSQL, Drizzle, Supabase, Dexie, PWA, WXT. Quality: Playwright, Vitest, axe, responsive QA, performance budgets, Vercel, Cloudflare. Infra: Linux, Docker, Portainer, SSH, DNS, Cloudflare Tunnel, Tailscale, self-hosting. AI workflow: Claude Code, Codex, Gemini, OpenCode, MCP, Ollama, multi-model review." src="./assets/stack-dark.svg" width="100%">
-</picture>
+[Portfolio Setup](https://github.com/mmoptibuilds-commits/portfolio-setup) is the written-down version of how I run projects with AI agents.
 
-## How I build
+## Tools
 
-- **Product first.** Nail the job, the constraints, the user journey and the quality bar before adding complexity.
-- **AI-assisted, human-directed.** Agents implement. I own the product, the trade-offs, the review loop and final acceptance.
-- **Verified, not vibes.** Type checks, tests, accessibility, responsive QA and real-browser runs are part of the build. Notes was signed off on real hardware, not just CI.
-- **Low-maintenance wins.** Simple, proven architecture beats clever and fragile when the outcome is the same.
-- **No fake claims.** Demo data is labelled as demo. Status pills above say exactly where each project stands.
+| Area | What I use |
+| --- | --- |
+| Web | Next.js, React, TypeScript, Tailwind CSS, Vite |
+| Apps | Flutter and Dart, browser extensions with WXT |
+| Data | PostgreSQL, Drizzle, Supabase, SQLite, Dexie |
+| Testing | Playwright, Vitest, axe |
+| Hosting | Vercel, Cloudflare, Docker, Tailscale, my own Linux machines at home |
+| AI | Claude Code, Codex, Gemini, OpenCode, Ollama, MCP |
 
-## Now
+## How I work
 
-- Shipping **Notes** updates and proving the signed in-app updater against a real published release.
-- Building the **mmoptibuilds Studio + Systems** business platform.
-- Tightening my agent workflow for planning, implementation, QA and deployment.
-- **Hearth OS** is parked for now. The repo stays up as-is.
+- I start from what the person using it needs to get done, and only add complexity when that needs it.
+- Agents write a lot of my code. I review it, and I decide what ships.
+- I test on real browsers and devices. Notes was checked on my phone and laptop before release.
+- When something simple works as well as something clever, I pick the simple one.
+- Demo projects are labelled as demos.
 
-<br>
+## Right now
 
-<p align="center"><sub>Building useful things where design, software, AI and infrastructure meet.</sub></p>
+- Working on Notes. The next step is testing the in-app updater against a real published release.
+- Building a new business website for mmoptibuilds.
+- Hearth OS is on hold.
