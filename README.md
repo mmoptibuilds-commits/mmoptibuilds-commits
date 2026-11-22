@@ -4,15 +4,15 @@
   <img alt="Mohammed Miran" src="./assets/header-light.svg" width="680">
 </picture>
 
-I build local-first apps and web products in Bengaluru. My work lives at [mmoptibuilds.com](https://mmoptibuilds.com). I'm @mmoptibuilds on [X](https://x.com/mmoptibuilds), [Instagram](https://www.instagram.com/mmoptibuilds) and [Threads](https://www.threads.net/@mmoptibuilds), and you can email me at [hello@mmoptibuilds.com](mailto:hello@mmoptibuilds.com).
+I build local-first apps and web products in Bengaluru. My work lives at [mmoptibuilds.com](https://mmoptibuilds.com). I'm @mmoptibuilds on [X](https://x.com/mmoptibuilds), [Instagram](https://www.instagram.com/mmoptibuilds) and [Threads](https://www.threads.net/@mmoptibuilds). If you need a website or hardware for a small business, email me at [hello@mmoptibuilds.com](mailto:hello@mmoptibuilds.com).
 
 ## About
 
-The name at the top cycles through English, Hindi, Urdu, Kannada and Japanese. Hindi and Urdu are my first languages, and Japanese is the one I'm learning.
+The name at the top cycles through five languages. Hindi and Urdu are my first, I speak English and Kannada, and I'm learning Japanese.
 
 I'm a BCA student and I run mmoptibuilds. It has two sides: Studio builds websites and web apps, and Systems handles custom PCs, workstations and hardware for small businesses.
 
-On software projects I write the spec and decide how things should look and behave. Coding agents do most of the typing. Nothing counts as done until I've used it in a real browser or on my own phone.
+On software projects I write the spec and decide how things should look and behave. Nothing counts as done until I've used it in a real browser or on my own phone.
 
 ## Work
 
@@ -41,13 +41,11 @@ On software projects I write the spec and decide how things should look and beha
 ## How I work
 
 - I start from what the person using it needs to get done, and only add complexity when that needs it.
-- Agents write a lot of my code. I review it, and I decide what ships.
+- I use AI coding agents heavily. I write the spec, review what they produce, and decide what ships.
 - I test on real browsers and devices. Notes was checked on my phone and laptop before release.
 - When something simple works as well as something clever, I pick the simple one.
-- Demo projects are labelled as demos.
 
 ## Right now
 
 - Working on Notes. The next step is testing the in-app updater against a real published release.
 - Building a new business website for mmoptibuilds.
-- Hearth OS is on hold.
