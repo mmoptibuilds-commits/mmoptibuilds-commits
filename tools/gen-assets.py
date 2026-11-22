@@ -309,6 +309,54 @@ def contact():
                 "Need a website or hardware for a small business? hello@mmoptibuilds.com", CON_W, CON_H, defs, body)
 
 
+# ---------------------------------------------------------------- how-I-work flow
+FLOW_W = 800
+FLOW_STEPS = ["Write the spec", "An AI agent builds it", "I review it",
+              "Use it in a real browser or on my phone", "It ships"]
+
+
+def flow():
+    nx, nw, nh, gap, top = 40, 560, 64, 44, 44
+    size, wght = 30, 600
+    widest = max(latin(t, size, wght)[2] - latin(t, size, wght)[1] for t in FLOW_STEPS)
+    size = min(size, size * (nw - 56) / widest)
+    base_off = nh / 2 + cap_height(size, wght) / 2
+    height = top * 2 + nh * len(FLOW_STEPS) + gap * (len(FLOW_STEPS) - 1)
+    mid = lambda i: top + i * (nh + gap) + nh / 2
+    cx = nx + nw / 2
+    a = f'stroke="{BONE}" stroke-opacity=".6" stroke-width="3" fill="none" stroke-linecap="round"'
+    head = lambda x, y, dx, dy: (f'<path d="M{x - 9 * dy - 9 * dx:.1f},{y - 9 * dx - 9 * dy:.1f}L{x:.1f},{y:.1f}'
+                                 f'L{x + 9 * dy - 9 * dx:.1f},{y + 9 * dx - 9 * dy:.1f}" {a}/>')
+    parts = []
+    for i, t in enumerate(FLOW_STEPS):
+        y = top + i * (nh + gap)
+        d, l, _, _, _ = latin(t, size, wght)
+        last = i == len(FLOW_STEPS) - 1
+        if last:
+            parts.append(f'<rect x="{nx}" y="{y}" width="{nw}" height="{nh}" rx="{nh / 2}" fill="{BONE}"/>')
+            parts.append(f'<path transform="translate({nx + 28 - l:.1f} {y + base_off:.1f})" d="{d}" fill="{INK}"/>')
+        else:
+            parts.append(f'<rect x="{nx + 1.25}" y="{y + 1.25}" width="{nw - 2.5}" height="{nh - 2.5}" rx="{nh / 2 - 1.25}" '
+                         f'fill="none" stroke="{BONE}" stroke-width="2.5"/>')
+            parts.append(f'<path transform="translate({nx + 28 - l:.1f} {y + base_off:.1f})" d="{d}" fill="{BONE}"/>')
+        if i < len(FLOW_STEPS) - 1:
+            y0, y1 = y + nh + 6, y + nh + gap - 6
+            parts.append(f'<path d="M{cx},{y0}V{y1}" {a}/>' + head(cx, y1, 0, 1))
+    lx = 672
+    y4, y2 = mid(3), mid(1)
+    parts.append(f'<path d="M{nx + nw + 6},{y4}H{lx}V{y2}H{nx + nw + 10}" {a}/>' + head(nx + nw + 6, y2, -1, 0))
+    wd, wl, _, _, _ = latin("Works", 24, 520)
+    dd, dl, _, _, _ = latin("Doesn't", 24, 520)
+    cap = cap_height(24, 520)
+    parts.append(f'<path transform="translate({cx + 18 - wl:.1f} {mid(3) + nh / 2 + gap / 2 + cap / 2:.1f})" d="{wd}" fill="{BONE}" fill-opacity=".75"/>')
+    parts.append(f'<path transform="translate({lx + 16 - dl:.1f} {(y4 + y2) / 2 + cap / 2:.1f})" d="{dd}" fill="{BONE}" fill-opacity=".75"/>')
+    defs = f'<clipPath id="p"><rect width="{FLOW_W}" height="{height}" rx="26"/></clipPath>'
+    body = f'<g clip-path="url(#p)"><rect width="{FLOW_W}" height="{height}" fill="{INK}"/>' + "".join(parts) + "</g>"
+    desc = ("Write the spec. An AI agent builds it. I review it. Use it in a real browser or on my phone. "
+            "If it works, it ships. If it doesn't, the agent builds it again.")
+    return wrap("How I work", desc, FLOW_W, height, defs, body)
+
+
 # ---------------------------------------------------------------- output
 def emit(name, text, readme):
     """Write assets/<name>.<hash>.svg, drop older copies, repoint README."""
@@ -337,6 +385,7 @@ def main():
     for name, label, status, version, dim in ROWS:
         readme = emit(name, row(label, status, version, dim), readme)
     readme = emit("tools", tools_strip(), readme)
+    readme = emit("flow", flow(), readme)
     readme = emit("contact", contact(), readme)
     readme_path.write_text(readme)
     for stale in ASSETS.glob("*.svg"):
