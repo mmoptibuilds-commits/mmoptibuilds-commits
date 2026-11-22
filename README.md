@@ -6,8 +6,6 @@
 
 I build local-first apps and web products in Bengaluru. My work lives at [mmoptibuilds.com](https://mmoptibuilds.com). I'm @mmoptibuilds on [X](https://x.com/mmoptibuilds), [Instagram](https://www.instagram.com/mmoptibuilds) and [Threads](https://www.threads.net/@mmoptibuilds), and you can email me at [hello@mmoptibuilds.com](mailto:hello@mmoptibuilds.com).
 
-There is an [interactive version of this profile](https://mmoptibuilds-commits.github.io/mmoptibuilds-commits/) with the same name cycle and a circle you can spin.
-
 ## About
 
 The name at the top cycles through English, Hindi, Urdu, Kannada and Japanese. Hindi and Urdu are my first languages, and Japanese is the one I'm learning.
